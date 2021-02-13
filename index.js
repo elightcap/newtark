@@ -18,7 +18,7 @@ const fs = require('fs');
 const util = require('util');
 const path = require('path');
 const request = require('request');
-var http = require('http');
+const https = require('https');
 const { Readable } = require('stream');
 //////////////////////////////////////////
 ///////////////// VARIA //////////////////
@@ -99,7 +99,7 @@ function loadConfig() {
 loadConfig()
 
 
-const https = require('https')
+//const https = require('https')
 function listWitAIApps(cb) {
     const options = {
       hostname: 'api.wit.ai',
@@ -373,17 +373,23 @@ function process_commands_query(query, mapKey, userid) {
 
 async function tark_message(message, mapKey) {
     let replymsgs = [];
-    const market = 'https://tarkov-market.com/'
-    const path = 'api/v1/item?q='
+    const market = 'tarkov-market.com'
+    const path = '/api/v1/item?q='
     const messes = message.content.split('\n');
     for (let mess of messes) {
         const args = mess.split(' ');
 
         if (args[0] == _CMD_PRICE && args.length) {
-            console.log('price');
-            var req = path.concat(item);
+            if(item.includes(' ')) {
+                var str1 = item.replace(" ","+")
+            }
+            else {
+                var str1 = item
+            }
+            var req = path + str1;
             var options = {
                 host: market,
+                port: 443,
                 path: req,
                 headers:{'x-api-key': tarkkey}
             };
@@ -396,8 +402,8 @@ async function tark_message(message, mapKey) {
                     console.log(str);
                 });
             }
-            var mreq = http.request(options,callback);
-            mreq.end()
+            var mReq = https.get(options, callback);
+            console.log('here is ' , str);
         }
     }
 }
@@ -467,7 +473,8 @@ async function transcribe(buffer) {
           witAI_lastcallTS = Math.floor(new Date());
           console.log(output.text)
           var thing = output.text
-          const item = thing.split("get price ")[1]
+          item = thing.split("get price ")[1]
+          console.log(item)
           stream.destroy()
           if (output && '_text' in output && output._text.length)
               return output._text
