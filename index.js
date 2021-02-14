@@ -382,20 +382,20 @@ async function tark_message(message, mapKey, voice_Connection) {
         const args = mess.split(' ');
 
         if (args[0] == _CMD_PRICE && args.length) {
-            if (item.includes(' ')) {
-                var str1 = item.replace(" ", "+")
-            }
-            else {
-                var str1 = item
-            }
-            var req = path + str1;
-            var options = {
-                host: market,
-                port: 443,
-                path: req,
-                headers: { 'x-api-key': tarkkey }
-            };
-            try {
+            if (item.length > 3) {
+                if (item.includes(' ')) {
+                    var str1 = item.replace(" ", "+")
+                }
+                else {
+                    var str1 = item
+                }
+                var req = path + str1;
+                var options = {
+                    host: market,
+                    port: 443,
+                    path: req,
+                    headers: { 'x-api-key': tarkkey }
+                };
                 callback = function (response) {
                     var str = ''
                     response.on('data', function (chunk) {
@@ -415,7 +415,15 @@ async function tark_message(message, mapKey, voice_Connection) {
                     });
                 }
                 var mReq = https.get(options, callback).end()
-            } catch (e) { console.log(e) }
+            } else {
+                var speech = 'Error!'
+                var gtts = new gTTS(speech,'en');
+                gtts.save('.data/err.mp3',function (err,result) {
+                    if(err) {throw new Error(err); }
+                    console.log("err saved")
+                    val.voice_Connection.play('./data/err.mp3', {volume: 0.5})
+                })
+            }
         }
     }
 }
