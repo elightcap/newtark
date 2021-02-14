@@ -372,10 +372,9 @@ function process_commands_query(query, mapKey, userid) {
     }
 }
 
-async function tark_message(message, mapKey) {
+async function tark_message(message, mapKey, voice_Connection) {
     let replymsgs = [];
-    let voice_Channel = await discordClient.channels.fetch(message.member.voice.channelID);
-    let voice_Connection = await voice_Channel.join();
+    let val = guildMap.get(mapKey)
     const market = 'tarkov-market.com'
     const path = '/api/v1/item?q='
     const messes = message.content.split('\n');
@@ -414,8 +413,8 @@ async function tark_message(message, mapKey) {
                     gtts.save('./data/tmp.mp3', function (err,result){
                         if(err) {throw new Error(err); }
                         console.log("speech saved");
+                        val.voice_Connection.play('./data/tmp.mp3', {volume:0.5});
                     });
-                    voice_Connection.play('./data/tmp.mp3', { volume: 0.5 });
                 });
             }
             var mReq = https.get(options,callback).end()
