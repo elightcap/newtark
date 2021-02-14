@@ -402,11 +402,7 @@ async function tark_message(message, mapKey, voice_Connection) {
                         str += chunk;
                     });
                     response.on('end', function () {
-                        console.log('here is 1 ', mReq.data);
-                        console.log('here is 2 ', str);
                         var mJson = JSON.parse(str);
-                        console.log('this is JSON', mJson);
-                        console.log('this is dot ref', mJson[0].shortName);
                         var mName = mJson[0].name
                         var mPrice = mJson[0].avg24hPrice
                         var speech = 'The price of ' + mName + 'is ' + mPrice;
