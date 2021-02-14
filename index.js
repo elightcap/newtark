@@ -14,11 +14,12 @@ console.log = function () {
 
 
 
-const fs = require('fs');
-const util = require('util');
-const path = require('path');
-const request = require('request');
-const https = require('https');
+const fs           = require('fs');
+const util         = require('util');
+const path         = require('path');
+const request      = require('request');
+const https        = require('https');
+const gTTS         = require('gtts');
 const { Readable } = require('stream');
 //////////////////////////////////////////
 ///////////////// VARIA //////////////////
@@ -373,6 +374,8 @@ function process_commands_query(query, mapKey, userid) {
 
 async function tark_message(message, mapKey) {
     let replymsgs = [];
+    let voice_Channel = await discordClient.channels.fetch(message.member.voice.channelID);
+    let voice_Connection = await voice_Channel.join();
     const market = 'tarkov-market.com'
     const path = '/api/v1/item?q='
     const messes = message.content.split('\n');
@@ -399,11 +402,23 @@ async function tark_message(message, mapKey) {
                     str += chunk;
                 });
                 response.on('end', function () {
-                    console.log(str);
+                    console.log('here is 1 ' , mReq.data);
+                    console.log('here is 2 ', str);
+                    var mJson = JSON.parse(str);
+                    console.log('this is JSON', mJson);
+                    console.log('this is dot ref',mJson[0].shortName);
+                    var mName = mJson[0].name
+                    var mPrice = mJson[0].avg24hPrice
+                    var speech = 'The price of ' + mName + 'is ' + mPrice ;
+                    var gtts = new gTTS(speech, 'en');
+                    gtts.save('./data/tmp.mp3', function (err,result){
+                        if(err) {throw new Error(err); }
+                        console.log("speech saved");
+                    });
+                    voice_Connection.play('./data/tmp.mp3', { volume: 0.5 });
                 });
             }
-            var mReq = https.get(options, callback);
-            console.log('here is ' , str);
+            var mReq = https.get(options,callback).end()
         }
     }
 }
