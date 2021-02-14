@@ -419,7 +419,7 @@ async function tark_message(message, mapKey, voice_Connection) {
                             var gtts = new gTTS(speech, 'en');
                             gtts.save('./data/notofound.mp3', function (err, result) {
                                 if (err) { throw new Error(err); }
-                                console.log("speech saved");
+                                console.log("not found");
                                 val.voice_Connection.play('./data/notfound.mp3', { volume: 0.5 });
                             });
                         }
