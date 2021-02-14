@@ -382,7 +382,7 @@ async function tark_message(message, mapKey, voice_Connection) {
         const args = mess.split(' ');
 
         if (args[0] == _CMD_PRICE && args.length) {
-            if (item.length > 3) {
+            if (item) {
                 if (item.includes(' ')) {
                     var str1 = item.replace(" ", "+")
                 }
@@ -418,7 +418,7 @@ async function tark_message(message, mapKey, voice_Connection) {
             } else {
                 var speech = 'Error!'
                 var gtts = new gTTS(speech,'en');
-                gtts.save('.data/err.mp3',function (err,result) {
+                gtts.save('./data/err.mp3',function (err,result) {
                     if(err) {throw new Error(err); }
                     console.log("err saved")
                     val.voice_Connection.play('./data/err.mp3', {volume: 0.5})
