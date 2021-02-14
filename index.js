@@ -402,26 +402,37 @@ async function tark_message(message, mapKey, voice_Connection) {
                         str += chunk;
                     });
                     response.on('end', function () {
-                        var mJson = JSON.parse(str);
-                        var mName = mJson[0].name
-                        var mPrice = mJson[0].avg24hPrice
-                        var speech = 'The price of ' + mName + 'is ' + mPrice;
-                        var gtts = new gTTS(speech, 'en');
-                        gtts.save('./data/tmp.mp3', function (err, result) {
-                            if (err) { throw new Error(err); }
-                            console.log("speech saved");
-                            val.voice_Connection.play('./data/tmp.mp3', { volume: 0.5 });
-                        });
+                        try {
+                            var mJson = JSON.parse(str);
+                            var mName = mJson[0].name
+                            var mPrice = mJson[0].avg24hPrice
+                            var speech = 'The price of ' + mName + 'is ' + mPrice;
+                            var gtts = new gTTS(speech, 'en');
+                            gtts.save('./data/tmp.mp3', function (err, result) {
+                                if (err) { throw new Error(err); }
+                                console.log("speech saved");
+                                val.voice_Connection.play('./data/tmp.mp3', { volume: 0.5 });
+                            });
+                        }
+                        catch (e) {
+                            var speech = 'Item not found'
+                            var gtts = new gTTS(speech, 'en');
+                            gtts.save('./data/notofound.mp3', function (err, result) {
+                                if (err) { throw new Error(err); }
+                                console.log("speech saved");
+                                val.voice_Connection.play('./data/notfound.mp3', { volume: 0.5 });
+                            });
+                        }
                     });
                 }
                 var mReq = https.get(options, callback).end()
             } else {
                 var speech = 'Error!'
-                var gtts = new gTTS(speech,'en');
-                gtts.save('./data/err.mp3',function (err,result) {
-                    if(err) {throw new Error(err); }
+                var gtts = new gTTS(speech, 'en');
+                gtts.save('./data/err.mp3', function (err, result) {
+                    if (err) { throw new Error(err); }
                     console.log("err saved")
-                    val.voice_Connection.play('./data/err.mp3', {volume: 0.5})
+                    val.voice_Connection.play('./data/err.mp3', { volume: 0.5 })
                 })
             }
         }
