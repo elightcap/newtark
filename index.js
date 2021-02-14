@@ -14,19 +14,19 @@ console.log = function () {
 
 
 
-const fs           = require('fs');
-const util         = require('util');
-const path         = require('path');
-const request      = require('request');
-const https        = require('https');
-const gTTS         = require('gtts');
+const fs = require('fs');
+const util = require('util');
+const path = require('path');
+const request = require('request');
+const https = require('https');
+const gTTS = require('gtts');
 const { Readable } = require('stream');
 //////////////////////////////////////////
 ///////////////// VARIA //////////////////
 //////////////////////////////////////////
 
 function necessary_dirs() {
-    if (!fs.existsSync('./data/')){
+    if (!fs.existsSync('./data/')) {
         fs.mkdirSync('./data/');
     }
 }
@@ -41,19 +41,19 @@ function shuffle(a) {
 }
 
 function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
 }
 
 async function convert_audio(input) {
     try {
         // stereo to mono channel
         const data = new Int16Array(input)
-        const ndata = new Int16Array(data.length/2)
-        for (let i = 0, j = 0; i < data.length; i+=4) {
+        const ndata = new Int16Array(data.length / 2)
+        for (let i = 0, j = 0; i < data.length; i += 4) {
             ndata[j++] = data[i]
-            ndata[j++] = data[i+1]
+            ndata[j++] = data[i + 1]
         }
         return Buffer.from(ndata);
     } catch (e) {
@@ -74,13 +74,13 @@ async function convert_audio(input) {
 const SETTINGS_FILE = 'settings.json';
 
 let DISCORD_TOK = null;
-let WITAPIKEY = null; 
+let WITAPIKEY = null;
 let SPOTIFY_TOKEN_ID = null;
 let SPOTIFY_TOKEN_SECRET = null;
 
 function loadConfig() {
     if (fs.existsSync(SETTINGS_FILE)) {
-        const CFG_DATA = JSON.parse( fs.readFileSync(SETTINGS_FILE, 'utf8') );
+        const CFG_DATA = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
         DISCORD_TOK = CFG_DATA.discord_token;
         WITAPIKEY = CFG_DATA.wit_ai_token;
         SPOTIFY_TOKEN_ID = CFG_DATA.spotify_token_id;
@@ -95,7 +95,7 @@ function loadConfig() {
     }
     if (!DISCORD_TOK || !WITAPIKEY)
         throw 'failed loading config #113 missing keys!'
-    
+
 }
 loadConfig()
 
@@ -103,61 +103,61 @@ loadConfig()
 //const https = require('https')
 function listWitAIApps(cb) {
     const options = {
-      hostname: 'api.wit.ai',
-      port: 443,
-      path: '/apps?offset=0&limit=100',
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer '+WITAPIKEY,
-      },
+        hostname: 'api.wit.ai',
+        port: 443,
+        path: '/apps?offset=0&limit=100',
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + WITAPIKEY,
+        },
     }
 
     const req = https.request(options, (res) => {
-      res.setEncoding('utf8');
-      let body = ''
-      res.on('data', (chunk) => {
-        body += chunk
-      });
-      res.on('end',function() {
-        cb(JSON.parse(body))
-      })
+        res.setEncoding('utf8');
+        let body = ''
+        res.on('data', (chunk) => {
+            body += chunk
+        });
+        res.on('end', function () {
+            cb(JSON.parse(body))
+        })
     })
 
     req.on('error', (error) => {
-      console.error(error)
-      cb(null)
+        console.error(error)
+        cb(null)
     })
     req.end()
 }
 function updateWitAIAppLang(appID, lang, cb) {
     const options = {
-      hostname: 'api.wit.ai',
-      port: 443,
-      path: '/apps/' + appID,
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer '+WITAPIKEY,
-      },
+        hostname: 'api.wit.ai',
+        port: 443,
+        path: '/apps/' + appID,
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + WITAPIKEY,
+        },
     }
     const data = JSON.stringify({
-      lang
+        lang
     })
 
     const req = https.request(options, (res) => {
-      res.setEncoding('utf8');
-      let body = ''
-      res.on('data', (chunk) => {
-        body += chunk
-      });
-      res.on('end',function() {
-        cb(JSON.parse(body))
-      })
+        res.setEncoding('utf8');
+        let body = ''
+        res.on('data', (chunk) => {
+            body += chunk
+        });
+        res.on('end', function () {
+            cb(JSON.parse(body))
+        })
     })
     req.on('error', (error) => {
-      console.error(error)
-      cb(null)
+        console.error(error)
+        cb(null)
     })
     req.write(data)
     req.end()
@@ -177,14 +177,14 @@ discordClient.on('ready', () => {
 discordClient.login(DISCORD_TOK)
 
 const PREFIX = '!';
-const  _CMD_HELP    = PREFIX+ 'help';
-const _CMD_JOIN     = PREFIX + 'join';
-const _CMD_LEAVE    = PREFIX + 'leave';
-const _CMD_PRICE    = PREFIX + 'price';
-const _CMD_DEBUG    = PREFIX + 'debug';
-const _CMD_TEST     = PREFIX + 'test';
-const _CMD_LANG     = PREFIX + 'lang';
-const TARK_CMDS     = [_CMD_PRICE];
+const _CMD_HELP = PREFIX + 'help';
+const _CMD_JOIN = PREFIX + 'join';
+const _CMD_LEAVE = PREFIX + 'leave';
+const _CMD_PRICE = PREFIX + 'price';
+const _CMD_DEBUG = PREFIX + 'debug';
+const _CMD_TEST = PREFIX + 'test';
+const _CMD_LANG = PREFIX + 'lang';
+const TARK_CMDS = [_CMD_PRICE];
 
 const guildMap = new Map();
 
@@ -207,13 +207,13 @@ discordClient.on('message', async (msg) => {
                 if (val.voice_Channel) val.voice_Channel.leave()
                 if (val.voice_Connection) val.voice_Connection.disconnect()
                 if (val.musicYTStream) val.musicYTStream.destroy()
-                    guildMap.delete(mapKey)
+                guildMap.delete(mapKey)
                 msg.reply("Disconnected.")
             } else {
                 msg.reply("Cannot leave because not connected.")
             }
         }
-        else if ( TARK_CMDS.indexOf( msg.content.trim().toLowerCase().split('\n')[0].split(' ')[0] ) >= 0 ) {
+        else if (TARK_CMDS.indexOf(msg.content.trim().toLowerCase().split('\n')[0].split(' ')[0]) >= 0) {
             if (!msg.member.voice.channelID) {
                 msg.reply('Error: please join a voice channel first.')
             } else {
@@ -238,16 +238,16 @@ discordClient.on('message', async (msg) => {
         else if (msg.content.split('\n')[0].split(' ')[0].trim().toLowerCase() == _CMD_LANG) {
             const lang = msg.content.replace(_CMD_LANG, '').trim().toLowerCase()
             listWitAIApps(data => {
-              if (!data.length)
-                return msg.reply('no apps found! :(')
-              for (const x of data) {
-                updateWitAIAppLang(x.id, lang, data => {
-                  if ('success' in data)
-                    msg.reply('succes!')
-                  else if ('error' in data && data.error !== 'Access token does not match')
-                    msg.reply('Error: ' + data.error)
-                })
-              }
+                if (!data.length)
+                    return msg.reply('no apps found! :(')
+                for (const x of data) {
+                    updateWitAIAppLang(x.id, lang, data => {
+                        if ('success' in data)
+                            msg.reply('succes!')
+                        else if ('error' in data && data.error !== 'Access token does not match')
+                            msg.reply('Error: ' + data.error)
+                    })
+                }
             })
         }
     } catch (e) {
@@ -258,15 +258,15 @@ discordClient.on('message', async (msg) => {
 
 function getHelpString() {
     let out = '**VOICE COMMANDS:**\n'
-        out += '```'
-        out += 'get price help\n'
+    out += '```'
+    out += 'get price help\n'
 
-        out += '**TEXT COMMANDS:**\n'
-        out += '```'
-        out += _CMD_HELP + '\n'
-        out += _CMD_JOIN + '/' + _CMD_LEAVE + '\n'
-        out += _CMD_PRICE+ ' [query]\n'
-        out += '```'
+    out += '**TEXT COMMANDS:**\n'
+    out += '```'
+    out += _CMD_HELP + '\n'
+    out += _CMD_JOIN + '/' + _CMD_LEAVE + '\n'
+    out += _CMD_PRICE + ' [query]\n'
+    out += '```'
     return out;
 }
 
@@ -290,7 +290,7 @@ async function connect(msg, mapKey) {
             'debug': false,
         });
         speak_impl(voice_Connection, mapKey)
-        voice_Connection.on('disconnect', async(e) => {
+        voice_Connection.on('disconnect', async (e) => {
             if (e) console.log(e);
             guildMap.delete(mapKey);
         })
@@ -310,7 +310,7 @@ function speak_impl(voice_Connection, mapKey) {
         console.log(`I'm listening to ${user.username}`)
         // this creates a 16-bit signed PCM, stereo 48KHz stream
         const audioStream = voice_Connection.receiver.createStream(user, { mode: 'pcm' })
-        audioStream.on('error',  (e) => { 
+        audioStream.on('error', (e) => {
             console.log('audioStream: ' + e)
         });
         let buffer = [];
@@ -350,10 +350,10 @@ function process_commands_query(query, mapKey, userid) {
     const regex = /^get ([a-zA-Z]+)(.+?)?$/;
     const m = query.toLowerCase().match(regex);
     if (m && m.length) {
-        const cmd = (m[1]||'').trim();
-        const args = (m[2]||'').trim();
+        const cmd = (m[1] || '').trim();
+        const args = (m[2] || '').trim();
 
-        switch(cmd) {
+        switch (cmd) {
             case 'help':
                 out = _CMD_HELP;
                 break;
@@ -382,8 +382,8 @@ async function tark_message(message, mapKey, voice_Connection) {
         const args = mess.split(' ');
 
         if (args[0] == _CMD_PRICE && args.length) {
-            if(item.includes(' ')) {
-                var str1 = item.replace(" ","+")
+            if (item.includes(' ')) {
+                var str1 = item.replace(" ", "+")
             }
             else {
                 var str1 = item
@@ -393,31 +393,33 @@ async function tark_message(message, mapKey, voice_Connection) {
                 host: market,
                 port: 443,
                 path: req,
-                headers:{'x-api-key': tarkkey}
+                headers: { 'x-api-key': tarkkey }
             };
-            callback = function(response) {
-                var str = ''
-                response.on('data',function (chunk) {
-                    str += chunk;
-                });
-                response.on('end', function () {
-                    console.log('here is 1 ' , mReq.data);
-                    console.log('here is 2 ', str);
-                    var mJson = JSON.parse(str);
-                    console.log('this is JSON', mJson);
-                    console.log('this is dot ref',mJson[0].shortName);
-                    var mName = mJson[0].name
-                    var mPrice = mJson[0].avg24hPrice
-                    var speech = 'The price of ' + mName + 'is ' + mPrice ;
-                    var gtts = new gTTS(speech, 'en');
-                    gtts.save('./data/tmp.mp3', function (err,result){
-                        if(err) {throw new Error(err); }
-                        console.log("speech saved");
-                        val.voice_Connection.play('./data/tmp.mp3', {volume:0.5});
+            try {
+                callback = function (response) {
+                    var str = ''
+                    response.on('data', function (chunk) {
+                        str += chunk;
                     });
-                });
-            }
-            var mReq = https.get(options,callback).end()
+                    response.on('end', function () {
+                        console.log('here is 1 ', mReq.data);
+                        console.log('here is 2 ', str);
+                        var mJson = JSON.parse(str);
+                        console.log('this is JSON', mJson);
+                        console.log('this is dot ref', mJson[0].shortName);
+                        var mName = mJson[0].name
+                        var mPrice = mJson[0].avg24hPrice
+                        var speech = 'The price of ' + mName + 'is ' + mPrice;
+                        var gtts = new gTTS(speech, 'en');
+                        gtts.save('./data/tmp.mp3', function (err, result) {
+                            if (err) { throw new Error(err); }
+                            console.log("speech saved");
+                            val.voice_Connection.play('./data/tmp.mp3', { volume: 0.5 });
+                        });
+                    });
+                }
+                var mReq = https.get(options, callback).end()
+            } catch (e) { console.log(e) }
         }
     }
 }
@@ -447,7 +449,7 @@ function message_chunking(msg, MAXL) {
     return chunks;
 }
 
-function callback(error,response,body) {
+function callback(error, response, body) {
     if (!error && response.statusCode == 200) {
         var info = JSON.parse(body)
         console.log(info)
@@ -458,43 +460,43 @@ async function transcribe(buffer) {
 
     return transcribe_witai(buffer)
     // return transcribe_gspeech(buffer)
-  }
-  
-  // WitAI
-  let witAI_lastcallTS = null;
-  const witClient = require('node-witai-speech');
-  async function transcribe_witai(buffer) {
-      try {
-          // ensure we do not send more than one request per second
-          if (witAI_lastcallTS != null) {
-              let now = Math.floor(new Date());    
-              while (now - witAI_lastcallTS < 1000) {
-                  console.log('sleep')
-                  await sleep(100);
-                  now = Math.floor(new Date());
-              }
-          }
-      } catch (e) {
-          console.log('transcribe_witai 837:' + e)
-      }
-  
-      try {
-          console.log('transcribe_witai')
-          const extractSpeechIntent = util.promisify(witClient.extractSpeechIntent);
-          var stream = Readable.from(buffer);
-          const contenttype = "audio/raw;encoding=signed-integer;bits=16;rate=48k;endian=little"
-          const output = await extractSpeechIntent(WITAPIKEY, stream, contenttype)
-          witAI_lastcallTS = Math.floor(new Date());
-          console.log(output.text)
-          var thing = output.text
-          item = thing.split("get price ")[1]
-          console.log(item)
-          stream.destroy()
-          if (output && '_text' in output && output._text.length)
-              return output._text
-          if (output && 'text' in output && output.text.length)
-              return output.text
-          return output;
-      } catch (e) { console.log('transcribe_witai 851:' + e); console.log(e) }
-  }
+}
+
+// WitAI
+let witAI_lastcallTS = null;
+const witClient = require('node-witai-speech');
+async function transcribe_witai(buffer) {
+    try {
+        // ensure we do not send more than one request per second
+        if (witAI_lastcallTS != null) {
+            let now = Math.floor(new Date());
+            while (now - witAI_lastcallTS < 1000) {
+                console.log('sleep')
+                await sleep(100);
+                now = Math.floor(new Date());
+            }
+        }
+    } catch (e) {
+        console.log('transcribe_witai 837:' + e)
+    }
+
+    try {
+        console.log('transcribe_witai')
+        const extractSpeechIntent = util.promisify(witClient.extractSpeechIntent);
+        var stream = Readable.from(buffer);
+        const contenttype = "audio/raw;encoding=signed-integer;bits=16;rate=48k;endian=little"
+        const output = await extractSpeechIntent(WITAPIKEY, stream, contenttype)
+        witAI_lastcallTS = Math.floor(new Date());
+        console.log(output.text)
+        var thing = output.text
+        item = thing.split("get price ")[1]
+        console.log(item)
+        stream.destroy()
+        if (output && '_text' in output && output._text.length)
+            return output._text
+        if (output && 'text' in output && output.text.length)
+            return output.text
+        return output;
+    } catch (e) { console.log('transcribe_witai 851:' + e); console.log(e) }
+}
 
