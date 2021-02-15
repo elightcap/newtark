@@ -180,7 +180,7 @@ const PREFIX = '!';
 const _CMD_HELP = PREFIX + 'help';
 const _CMD_JOIN = PREFIX + 'join';
 const _CMD_LEAVE = PREFIX + 'leave';
-const _CMD_PRICE = PREFIX + 'price';
+const _CMD_PRICE = PREFIX + 'cost';
 const _CMD_DEBUG = PREFIX + 'debug';
 const _CMD_TEST = PREFIX + 'test';
 const _CMD_LANG = PREFIX + 'lang';
@@ -379,6 +379,7 @@ function process_commands_query(query, mapKey, userid) {
 async function tark_message(message, mapKey, voice_Connection) {
     let replymsgs = [];
     let val = guildMap.get(mapKey)
+    const testUserID = "259876775746600960"
     const market = 'tarkov-market.com'
     const path = '/api/v1/item?q='
     const messes = message.content.split('\n');
@@ -436,6 +437,7 @@ async function tark_message(message, mapKey, voice_Connection) {
         }
     }
 }
+
 async function itemnotfound(mapKey) {
     let val = guildMap.get(mapKey)
     var speech = 'Item ' + item + ' not found'
