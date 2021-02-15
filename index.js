@@ -208,7 +208,8 @@ discordClient.on('message', async (msg) => {
                 if (val.voice_Connection) val.voice_Connection.disconnect()
                 if (val.musicYTStream) val.musicYTStream.destroy()
                 guildMap.delete(mapKey)
-                msg.reply("Disconnected.")
+                //msg.reply("Disconnected.")
+                console.log('disconnected')
             } else {
                 msg.reply("Cannot leave because not connected.")
             }
@@ -294,7 +295,8 @@ async function connect(msg, mapKey) {
             if (e) console.log(e);
             guildMap.delete(mapKey);
         })
-        msg.reply('connected!')
+        //msg.reply('connected!')
+        console.log('connected');
     } catch (e) {
         console.log('connect: ' + e)
         msg.reply('Error: unable to join your voice channel.');
@@ -347,7 +349,7 @@ function process_commands_query(query, mapKey, userid) {
 
     let out = null;
 
-    const regex = /^get ([a-zA-Z]+)(.+?)?$/;
+    const regex = /^get (price|praise)(.+?)?$/;
     const m = query.toLowerCase().match(regex);
     if (m && m.length) {
         const cmd = (m[1] || '').trim();
@@ -358,6 +360,8 @@ function process_commands_query(query, mapKey, userid) {
                 out = _CMD_HELP;
                 break;
             case 'price':
+                out = _CMD_PRICE;
+            case 'praise':
                 out = _CMD_PRICE;
                 break;
         }
@@ -384,7 +388,7 @@ async function tark_message(message, mapKey, voice_Connection) {
         if (args[0] == _CMD_PRICE && args.length) {
             if (item) {
                 if (item.includes(' ')) {
-                    var str1 = item.replace(" ", "+")
+                    var str1 = item.replaceAll(" ", "+")
                 }
                 else {
                     var str1 = item
@@ -415,19 +419,13 @@ async function tark_message(message, mapKey, voice_Connection) {
                             });
                         }
                         catch (e) {
-                            var speech = 'Item not found'
-                            var gtts = new gTTS(speech, 'en');
-                            gtts.save('./data/notofound.mp3', function (err, result) {
-                                if (err) { throw new Error(err); }
-                                console.log("not found");
-                                val.voice_Connection.play('./data/notfound.mp3', { volume: 0.5 });
-                            });
+                            itemnotfound(mapKey)
                         }
                     });
                 }
                 var mReq = https.get(options, callback).end()
             } else {
-                var speech = 'Error!'
+                var speech = 'Error! Use push to talk'
                 var gtts = new gTTS(speech, 'en');
                 gtts.save('./data/err.mp3', function (err, result) {
                     if (err) { throw new Error(err); }
@@ -437,6 +435,16 @@ async function tark_message(message, mapKey, voice_Connection) {
             }
         }
     }
+}
+async function itemnotfound(mapKey) {
+    let val = guildMap.get(mapKey)
+    var speech = 'Item ' + item + ' not found'
+    var gtts = new gTTS(speech, 'en');
+    gtts.save('./data/notfound.mp3', function (err, result) {
+        if (err) {throw new Error(err); }
+        console.log(speech);
+        val.voice_Connection.play('./data/notfound.mp3', { volume: 0.5 });
+    });
 }
 
 function message_chunking(msg, MAXL) {
@@ -504,8 +512,13 @@ async function transcribe_witai(buffer) {
         witAI_lastcallTS = Math.floor(new Date());
         console.log(output.text)
         var thing = output.text
-        item = thing.split("get price ")[1]
-        console.log(item)
+        if(thing.includes('price')) {
+            item = thing.split("get price ")[1]
+            console.log(item)
+        } else if(thing.includes('praise')) {
+            item = thing.split("get praise ")[1]
+            console.log(item)
+        }
         stream.destroy()
         if (output && '_text' in output && output._text.length)
             return output._text
