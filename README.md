@@ -13,3 +13,9 @@ This is a bot that gives prices for items on the tarkov flea market.  ill update
 Text commands are !join and !leave.  !Join will have the bot connect to the voice channel the user is in.  After connecting, user can say "Get price <item>" and if the bot understood it will say the item and price.  
   
 Wit.ai likely needs to be trained, as it doesnt recognize tarkov specific items, like 'Salewa'.  It also has trouble transciribing numbers, like "san 203" will transcribe as "san two oh three" which wont be found.
+
+# Todo
+1. cleanup uneeded functions
+2. learn to train wit.ai
+3. look into using google for speech to text
+4. learn nodejs 
