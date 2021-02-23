@@ -411,7 +411,7 @@ async function tark_message(message, mapKey, voice_Connection) {
                             var mJson = JSON.parse(str);
                             var mName = mJson[0].name
                             var mPrice = mJson[0].avg24hPrice
-                            var speech = 'The price of ' + mName + 'is ' + mPrice;
+                            var speech = 'The price of ' + mName + ' is ' + mPrice + 'rubles. This is not financial advice.';
                             var gtts = new gTTS(speech, 'en');
                             gtts.save('./data/tmp.mp3', function (err, result) {
                                 if (err) { throw new Error(err); }
