@@ -20,6 +20,7 @@ const path = require('path');
 const request = require('request');
 const https = require('https');
 const gTTS = require('gtts');
+const yahooFinance = require('yahoo-finance')
 const { Readable } = require('stream');
 //////////////////////////////////////////
 ///////////////// VARIA //////////////////
@@ -334,6 +335,7 @@ function speak_impl(voice_Connection, mapKey) {
                 let out = await transcribe(new_buffer);
                 if (out != null)
                     process_commands_query(out, mapKey, user.id);
+                    checkID = user.id;
             } catch (e) {
                 console.log('tmpraw rename: ' + e)
             }
@@ -379,14 +381,16 @@ function process_commands_query(query, mapKey, userid) {
 async function tark_message(message, mapKey, voice_Connection) {
     let replymsgs = [];
     let val = guildMap.get(mapKey)
-    const testUserID = "259876775746600960"
     const market = 'tarkov-market.com'
     const path = '/api/v1/item?q='
     const messes = message.content.split('\n');
     for (let mess of messes) {
         const args = mess.split(' ');
-
         if (args[0] == _CMD_PRICE && args.length) {
+            speakem(mapKey, voice_Connection)
+            if(endFunc) {
+                return
+            }
             if (item) {
                 if (item.includes(' ')) {
                     var str1 = item.replaceAll(" ", "+")
@@ -412,7 +416,7 @@ async function tark_message(message, mapKey, voice_Connection) {
                             var mName = mJson[0].name
                             var mPrice = mJson[0].avg24hPrice
                             var speech = 'The price of ' + mName + ' is ' + mPrice + 'rubles. This is not financial advice.';
-                            var gtts = new gTTS(speech, 'en');
+                            var gtts = new gTTS(speech, 'en-uk');
                             gtts.save('./data/tmp.mp3', function (err, result) {
                                 if (err) { throw new Error(err); }
                                 console.log("speech saved");
@@ -427,10 +431,9 @@ async function tark_message(message, mapKey, voice_Connection) {
                 var mReq = https.get(options, callback).end()
             } else {
                 var speech = 'Error! Use push to talk'
-                var gtts = new gTTS(speech, 'en');
+                var gtts = new gTTS(speech, 'en-au');
                 gtts.save('./data/err.mp3', function (err, result) {
                     if (err) { throw new Error(err); }
-                    console.log("err saved")
                     val.voice_Connection.play('./data/err.mp3', { volume: 0.5 })
                 })
             }
@@ -441,12 +444,74 @@ async function tark_message(message, mapKey, voice_Connection) {
 async function itemnotfound(mapKey) {
     let val = guildMap.get(mapKey)
     var speech = 'Item ' + item + ' not found'
-    var gtts = new gTTS(speech, 'en');
+    var gtts = new gTTS(speech, 'en-au');
     gtts.save('./data/notfound.mp3', function (err, result) {
         if (err) {throw new Error(err); }
         console.log(speech);
         val.voice_Connection.play('./data/notfound.mp3', { volume: 0.5 });
     });
+}
+
+async function speakem(mapKey, voice_Connection) {
+    let val = guildMap.get(mapKey)
+    var userID1 = '90702001410691072'
+    console.log(checkID);
+    if (checkID == userID1) {
+        var min = 0
+        var max = 10
+        var rando = Math.floor(Math.random() * (max - min + 1) + min);
+        console.log(rando)
+        if( rando <= 1) {
+            endFunc = true
+            var speech = 'this is a test'
+            var gtts = new gTTS(speech, 'en');
+            gtts.save('./data/err.mp3', function (err, result) {
+                if (err) { throw new Error(err); }
+                val.voice_Connection.play('./data/sum.mp3', { volume: 1.2 })
+            })
+        }
+        else {
+                endFunc = false
+        }
+    }
+    else if(item == "summit") {
+        endFunc = true
+        var speech = 'this is a test'
+        var gtts = new gTTS(speech, 'en');
+        gtts.save('./data/err.mp3', function (err, result) {
+            if (err) { throw new Error(err); }
+            val.voice_Connection.play('./data/sum.mp3', { volume: 1.2 })
+        })
+    }
+    else if (item == "game stop" || item == "gamestop") {
+        endFunc = true
+        yahooFinance.quote({
+        symbol: 'GME',
+        modules: ['price', 'summaryDetail']
+        }, function(err, quote) {
+               //console.log(quote.price)
+               today = new Date().getHours();
+               if ( today >= 6.5 && today <= 13) {
+                   stonk = quote.price.regularMarketPrice
+                   //console.log(stonk)
+               }
+               else if (today >= 1 && today < 6.5) {
+                   stonk = quote.price.preMarketPrice
+               }
+               else {
+                   stonk = quote.price.postMarketPrice
+               }
+               var speech = 'The price of gamestonk is ' + stonk + ' dollars';
+               var gtts = new gTTS(speech, 'en-au');
+               gtts.save('./data/stonk.mp3', function (err, result) {
+                   if (err) {throw new Error(err); }
+                   val.voice_Connection.play('./data/stonk.mp3', { volume: 0.5 })
+              })
+        })
+    }
+    else {
+        endFunc = false
+    }
 }
 
 function message_chunking(msg, MAXL) {
